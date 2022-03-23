@@ -147,14 +147,22 @@ ENV PATH ${PATH}:/var/www/html
 WORKDIR /var/www/html
 RUN git clone -b $BRANCH https://$GIT_TOKEN@github.com/$GIT_REPO.git .
 
+RUN wget -O /usr/local/bin/composer https://getcomposer.org/download/2.2.7/composer.phar
+RUN chmod 755 /usr/local/bin/composer
+
+WORKDIR /var/www/html/drupal
+RUN composer install --no-interaction
+
 # Add directories for public and private files
-RUN mkdir -p  /home/site/wwwroot/sites/default/files \
-    && mkdir -p  /home/site/wwwroot/sites/default/files/private \
-    && ln -s /home/site/wwwroot/sites/default/files  /var/www/html/docroot/sites/default/files \
-    && ln -s /home/site/wwwroot/sites/default/files/private /var/www/html/docroot/sites/default/files/private
+RUN mkdir -p  /home/site/wwwroot/sites/default/files 
+RUN mkdir -p  /home/site/wwwroot
+RUN mv /var/www/html/drupal/private-files /home/site/wwwroot/private-files 
+RUN test -d /var/www/html/drupal/web/sites/default/files && rm -rf /var/www/html/drupal/web/sites/default/files || echo "does not exist"
+RUN ln -s /home/site/wwwroot/sites/default/files  /var/www/html/drupal/web/sites/default/files
+RUN ln -s /home/site/wwwroot/private-files /var/www/html/drupal/private-files
 
 ### Webroot permissions per www.drupal.org/node/244924#linux-servers ###
-WORKDIR /var/www/html/docroot
+WORKDIR /var/www/html/drupal/web
 RUN chown -R root:www-data .
 RUN find . -type d -exec chmod u=rwx,g=rx,o= '{}' \;
 RUN find . -type f -exec chmod u=rw,g=r,o= '{}' \;
@@ -162,3 +170,6 @@ RUN find . -type f -exec chmod u=rw,g=r,o= '{}' \;
 # /home/site/wwwroot/sites/default/files
 
 ENTRYPOINT ["/bin/init_container.sh"]
+
+
+

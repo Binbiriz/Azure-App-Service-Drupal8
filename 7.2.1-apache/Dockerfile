@@ -1,9 +1,9 @@
-FROM php:7.2.1-apache
-MAINTAINER Azure App Services Container Images <appsvc-images@microsoft.com>
+FROM php:7.4.28-apache-bullseye
+# MAINTAINER Azure App Services Container Images <appsvc-images@microsoft.com>
 
 COPY apache2.conf /bin/
 COPY init_container.sh /bin/
-COPY hostingstart.html /home/site/wwwroot/hostingstart.html
+COPY index.php /home/site/wwwroot/index.php
 
 RUN a2enmod rewrite expires include deflate
 
@@ -61,7 +61,7 @@ RUN   \
    && rm -rf /var/log/apache2 \
    && mkdir -p /home/LogFiles \
    && ln -s /home/site/wwwroot /var/www/html \
-   && ln -s /home/LogFiles /var/log/apache2 
+   && ln -s /home/LogFiles /var/log/apache2
 
 
 RUN { \
@@ -86,7 +86,7 @@ COPY sshd_config /etc/ssh/
 EXPOSE 2222 8080
 
 ENV APACHE_RUN_USER www-data
-ENV PHP_VERSION 7.2.1
+ENV PHP_VERSION 7.4.28
 
 ENV PORT 8080
 ENV WEBSITE_ROLE_INSTANCE_ID localRoleInstance

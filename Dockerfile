@@ -30,6 +30,7 @@ RUN set -eux; \
 		libpng-dev \
 		libpq-dev \
 		libzip-dev \
+		libsqlite3-dev \
 	; \
 	\
 	docker-php-ext-configure gd \
@@ -44,6 +45,7 @@ RUN set -eux; \
 		pdo_mysql \
 		pdo_pgsql \
 		zip \
+		pdo_sqlite \
 	; \
 	\
 # reset apt-mark's "manual" list so that "purge --auto-remove" will remove all build dependencies
@@ -145,7 +147,7 @@ ENV PATH ${PATH}:/var/www/html
 
 
 WORKDIR /var/www/html
-RUN git clone -b $BRANCH https://$GIT_TOKEN@github.com/$GIT_REPO.git .
+RUN git clone -b $BRANCH https://$GIT_TOKEN@gitlab.com/$GIT_REPO.git .
 
 RUN wget -O /usr/local/bin/composer https://getcomposer.org/download/2.2.7/composer.phar
 RUN chmod 755 /usr/local/bin/composer
@@ -154,9 +156,9 @@ WORKDIR /var/www/html/drupal
 RUN composer install --no-interaction
 
 # Add directories for public and private files
-RUN mkdir -p  /home/site/wwwroot/sites/default/files 
-RUN mkdir -p  /home/site/wwwroot
-RUN mv /var/www/html/drupal/private-files /home/site/wwwroot/private-files 
+RUN mkdir -p  /home/site/wwwroot/sites/default/files
+RUN mkdir -p  /var/www/html/drupal/private-files
+RUN mv /var/www/html/drupal/private-files /home/site/wwwroot/private-files
 RUN test -d /var/www/html/drupal/web/sites/default/files && rm -rf /var/www/html/drupal/web/sites/default/files || echo "does not exist"
 RUN ln -s /home/site/wwwroot/sites/default/files  /var/www/html/drupal/web/sites/default/files
 RUN ln -s /home/site/wwwroot/private-files /var/www/html/drupal/private-files
